@@ -1,0 +1,56 @@
+# Virtual environment
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Pytest
+.pytest_cache/
+
+# Ruff
+.ruff_cache/
+
+# Coverage / test reports
+.coverage
+htmlcov/
+coverage.xml
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+
+# Local databases
+*.db
+*.sqlite3
+
+# Environment variables
+.env
+.env.*
+
+# IDEs / editors
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Mypy
+.mypy_cache/
+
+# Pyright
+.pyright/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Docker overrides
+docker-compose.override.yml
