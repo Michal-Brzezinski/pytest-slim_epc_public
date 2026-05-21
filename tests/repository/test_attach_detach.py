@@ -8,7 +8,7 @@ class TestAttachDetach:
         state = test_repo.get_ue(1)
         assert 9 in state.bearers
 
-    def test_attach_ue_initializes_empty_bearers_dict(self, test_repo):
+    def test_attach_ue_initializes_bearers_with_only_default_bearer(self, test_repo):
         test_repo.attach_ue(5)
         state = test_repo.get_ue(5)
         assert len(state.bearers) == 1
