@@ -1,3 +1,18 @@
+from pytest import fixture
+
+
+@fixture
+def attach_ue_id_3(client):
+    resp = client.post("/ues", json={"ue_id": 3})
+    assert resp.status_code == 200
+    return resp
+
+@fixture
+def attach_ue_id_4(client):
+    resp = client.post("/ues", json={"ue_id": 4})
+    assert resp.status_code == 200
+    return resp
+
 def test_list_ues_initially_empty(client):
     resp = client.get("/ues")
     assert resp.status_code == 200
