@@ -24,7 +24,7 @@ def test_add_bearer_duplicate(client, attach_bearer_id_7_to_ue_id_3):
 
     resp = client.post("/ues/3/bearers", json={"bearer_id": 7})  # 7 już istnieje
 
-    assert resp.status_code == 400
+    assert resp.status_code == 422
     assert resp.json()["detail"] == "Bearer already exists"
 
 def test_delete_bearer_success(client, attach_bearer_id_7_to_ue_id_3):
@@ -43,7 +43,7 @@ def test_delete_bearer_not_found(client):
 
     resp = client.delete("/ues/3/bearers/7")
 
-    assert resp.status_code == 400
+    assert resp.status_code == 422
     assert resp.json()["detail"] == "Bearer not found"
 
 def test_delete_bearer_default_forbidden(client):
@@ -51,5 +51,5 @@ def test_delete_bearer_default_forbidden(client):
 
     resp = client.delete("/ues/3/bearers/9")
 
-    assert resp.status_code == 400
+    assert resp.status_code == 422
     assert resp.json()["detail"] == "Cannot remove default bearer"
