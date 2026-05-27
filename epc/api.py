@@ -41,7 +41,7 @@ def get_ues_stats(
     include_details: bool = False,
 ):
     if ue_id is not None and not repo.ue_exists(ue_id):
-        raise HTTPException(status_code=400, detail="UE not found")
+        raise HTTPException(status_code=422, detail="UE not found")
     ues = [ue_id] if ue_id is not None else list(repo.list_ues())
     total_tx = 0
     total_rx = 0
@@ -53,7 +53,7 @@ def get_ues_stats(
             state = repo.get_ue(uid)
         except ValueError:
             if ue_id is not None:
-                raise HTTPException(status_code=400, detail="UE not found")
+                raise HTTPException(status_code=422, detail="UE not found")
             continue
         for b_id, stats in state.stats.items():
             end_ts = time.time() if (stats.start_ts and tm.is_running(uid, b_id)) else stats.last_update_ts
@@ -86,7 +86,7 @@ def attach_ue(body: AttachUERequest, repo: Annotated[EPCRepository, Depends(get_
     try:
         repo.attach_ue(body.ue_id)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e))
     return AttachResponse(status="attached", ue_id=body.ue_id)
 
 
@@ -95,7 +95,7 @@ def get_ue(ue_id: int, repo: Annotated[EPCRepository, Depends(get_repo)]):
     try:
         state = repo.get_ue(ue_id)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e))
     return UEDisplayResponse(**state.model_dump())
 
 
@@ -104,7 +104,7 @@ def detach_ue(ue_id: int, repo: Annotated[EPCRepository, Depends(get_repo)]):
     try:
         repo.detach_ue(ue_id)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e))
     return DetachResponse(status="detached", ue_id=ue_id)
 
 
@@ -119,7 +119,7 @@ def add_bearer(
     try:
         repo.add_bearer(ue_id, body.bearer_id)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e))
     return BearerAddResponse(status="bearer_added", ue_id=ue_id, bearer_id=body.bearer_id)
 
 
@@ -132,16 +132,16 @@ def delete_bearer(
     try:
         state = repo.get_ue(ue_id)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e))
     if bearer_id not in state.bearers:
-        raise HTTPException(status_code=400, detail="Bearer not found")
+        raise HTTPException(status_code=422, detail="Bearer not found")
     tm = get_traffic_manager(repo)
     if tm.is_running(ue_id, bearer_id):
         tm.stop(ue_id, bearer_id)
     try:
         repo.delete_bearer(ue_id, bearer_id)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e))
     return BearerDeleteResponse(status="bearer_deleted", ue_id=ue_id, bearer_id=bearer_id)
 
 
@@ -158,10 +158,10 @@ def start_traffic(
     try:
         state = repo.get_ue(ue_id)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e))
     bearer = state.bearers.get(bearer_id)
     if not bearer:
-        raise HTTPException(status_code=400, detail="Bearer not found")
+        raise HTTPException(status_code=422, detail="Bearer not found")
     bearer.protocol = body.protocol.lower()
     bearer.target_bps = target_bps
     bearer.active = True
@@ -182,7 +182,7 @@ def start_traffic(
     try:
         tm.start(ue_id, bearer)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e))
     return TrafficStartResponse(
         status="traffic_started",
         ue_id=ue_id,
@@ -200,10 +200,10 @@ def stop_traffic(
     try:
         state = repo.get_ue(ue_id)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e))
     bearer = state.bearers.get(bearer_id)
     if not bearer:
-        raise HTTPException(status_code=400, detail="Bearer not found")
+        raise HTTPException(status_code=422, detail="Bearer not found")
     tm = get_traffic_manager(repo)
     tm.stop(ue_id, bearer_id)
     bearer.active = False
@@ -220,7 +220,7 @@ def get_traffic_stats(
     try:
         state = repo.get_ue(ue_id)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e))
     stats = state.stats.get(bearer_id)
     if not stats:
         return TrafficStatsResponse(
